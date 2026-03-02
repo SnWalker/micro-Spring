@@ -1,0 +1,47 @@
+@startuml
+
+interface BeanFactory {
+    + getBean(String name) : Object
+}
+
+interface SingletonBeanRegistry {
+    + getSingleton(String beanName) : Object
+}
+
+interface BeanDefinitionRegistry {
+    + registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
+}
+
+class DefaultSingleBeanRegistry implements SingletonBeanRegistry {
+    - singletonObjects : Map<String, Object>
+    + getSingleton(String beanName) : Object
+    + addSingleton(String beanName, Object singletonObject)
+}
+
+abstract class AbstractBeanFactory extends DefaultSingleBeanRegistry implements BeanFactory {
+    + getBean(String name) : Object
+    # {abstract} createBean(String name, BeanDefinition beanDefinition) : Object
+    # {abstract} getBeanDefinition(String name) : BeanDefinition
+}
+
+abstract class AbstractAutowiredCapableBeanFactory extends AbstractBeanFactory {
+    # createBean(String beanName, BeanDefinition beanDefinition) : Object
+    # doCreateBean(String beanName, BeanDefinition beanDefinition) : Object
+}
+
+class DefaultListableBeanFactory extends AbstractAutowiredCapableBeanFactory implements BeanDefinitionRegistry {
+    - beanDefinitionMap : Map<String, BeanDefinition>
+    + registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
+    # getBeanDefinition(String beanName) : BeanDefinition
+}
+
+class BeanDefinition {
+    - beanClass : Class
+    + BeanDefinition(Class beanClass)
+    + getBeanClass() : Class
+    + setBeanClass(Class beanClass) : void
+}
+
+DefaultListableBeanFactory "1" o-- "*" BeanDefinition : contains
+
+@enduml

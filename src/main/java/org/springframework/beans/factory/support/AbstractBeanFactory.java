@@ -5,24 +5,39 @@ import org.springframework.beans.factory.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 
 /**
- * 车间主任（只定规矩，不干活）。实现了 getBean() 的核心骨架（规矩）：先去成品仓库找(getSingleton) -> 找不到就去拿图纸 (getBeanDefinition) -> 拿到图纸就去造对象 (createBean)。
+ * 抽象的 Bean 工厂基类。
  *
- * 模版方法设计模式：BeanFactory(接口) -> DefaultListableBeanFactory(集大成者，创建对象能力 + 管理图纸能力)
+ * <p>角色定位：【车间主任】（负责编排生产工序，具体干活交给下级）
+ * <p>设计思想：典型的<b>模板方法模式 (Template Method Pattern)</b>。它定义了 getBean 的核心执行算法：
+ * 1. 尝试从成品仓库直接拿成品 (getSingleton)；
+ * 2. 仓库没有，去档案室调取图纸 (getBeanDefinition)；
+ * 3. 下达指令：开始造这个 Bean (createBean)。
+ * 遵循了<b>开闭原则 (OCP)</b>，核心流程不可变，但具体步骤（如何拿图纸、如何造对象）由子类扩展。
  */
 public abstract class AbstractBeanFactory extends DefaultSingleBeanRegistry implements BeanFactory {
 
     @Override
     public Object getBean(String name) {
+        // 首先尝试从成品缓存中获取已存在的单例（先去仓库看看有没有现成的成品）
         Object bean = this.getSingleton(name);
         if (bean != null) {
             return bean;
         }
-        // 单例池没有，先获取bean信息，再创建一个
+
+        // 如果缓存没有，则调取对应的 Bean 定义信息（去档案室调取施工图纸）
         BeanDefinition beanDefinition = getBeanDefinition(name);
+
+        // 根据图纸信息创建新的 Bean 实例（交给车间小组长开始生产）
         return createBean(name, beanDefinition);
     }
 
+    /**
+     * 抽象方法：创建 Bean 实例。由 AbstractAutowireCapableBeanFactory 实现。
+     */
     protected abstract Object createBean(String name, BeanDefinition beanDefinition) throws BeansException;
 
+    /**
+     * 抽象方法：获取 Bean 定义信息。由 DefaultListableBeanFactory 实现。
+     */
     protected abstract BeanDefinition getBeanDefinition(String name) throws BeansException;
 }

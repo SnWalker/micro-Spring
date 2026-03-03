@@ -6,27 +6,31 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 单例池 （成品仓库，存放单例对象，只负责存储和出货）
+ * 默认的单例对象注册表实现。
+ *
+ * <p>角色定位：【成品仓库实体】
+ * <p>设计思想：体现了<b>单一职责原则 (SRP)</b>。它唯一的任务就是管理单例池的存取，
+ * 专门负责单例对象的“入库”与“出库”，确保整个容器生命周期内某个 Bean 只有一个实例。
  */
 public class DefaultSingleBeanRegistry implements SingletonBeanRegistry {
+
+    /** 单例对象缓存池（成品仓库的货架，存着名字与对象的对应关系） */
     private Map<String, Object> singletonObjects = new ConcurrentHashMap<>();
 
-    /**
-     * 获取单例
-     * @param beanName
-     * @return
-     */
     @Override
     public Object getSingleton(String beanName) {
+        // 从 Map 中直接获取已存在的对象实例（直接从货架上取成品）
         return singletonObjects.get(beanName);
     }
 
     /**
-     * 添加单例
-     * @param beannName
-     * @param singletonObject
+     * 将对象放入单例池。
+     *
+     * @param beanName Bean 名称
+     * @param singletonObject 成品对象
      */
-    public void addSingleton(String beannName, Object singletonObject) {
-        singletonObjects.put(beannName, singletonObject);
+    public void addSingleton(String beanName, Object singletonObject) {
+        // 将实例放入单例池（产品造好后，运入仓库货架）
+        singletonObjects.put(beanName, singletonObject);
     }
 }

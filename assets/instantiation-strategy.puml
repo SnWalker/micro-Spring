@@ -1,0 +1,15 @@
+@startuml
+
+interface InstantiationStrategy {
+    + instantiate(BeanDefinition beanDefinition) : Object
+}
+
+class SimpleInstantiationStrategy implements InstantiationStrategy {
+    + instantiate(BeanDefinition beanDefinition) : Object
+}
+
+class CglibSubclassingInstantiationStrategy implements InstantiationStrategy {
+    + instantiate(BeanDefinition beanDefinition) : Object
+}
+
+@enduml

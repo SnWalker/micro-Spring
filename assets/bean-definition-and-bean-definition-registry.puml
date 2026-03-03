@@ -24,12 +24,12 @@ abstract class AbstractBeanFactory extends DefaultSingleBeanRegistry implements 
     # {abstract} getBeanDefinition(String name) : BeanDefinition
 }
 
-abstract class AbstractAutowiredCapableBeanFactory extends AbstractBeanFactory {
+abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory {
     # createBean(String beanName, BeanDefinition beanDefinition) : Object
     # doCreateBean(String beanName, BeanDefinition beanDefinition) : Object
 }
 
-class DefaultListableBeanFactory extends AbstractAutowiredCapableBeanFactory implements BeanDefinitionRegistry {
+class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory implements BeanDefinitionRegistry {
     - beanDefinitionMap : Map<String, BeanDefinition>
     + registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
     # getBeanDefinition(String beanName) : BeanDefinition

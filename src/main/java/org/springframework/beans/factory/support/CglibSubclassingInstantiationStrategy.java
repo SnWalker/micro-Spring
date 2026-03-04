@@ -2,8 +2,11 @@ package org.springframework.beans.factory.support;
 
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.MethodProxy;
 import org.springframework.beans.factory.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
+
+import java.lang.reflect.Method;
 
 /**
  * 基于 CGLIB 的实例化策略。
@@ -25,14 +28,22 @@ public class CglibSubclassingInstantiationStrategy implements InstantiationStrat
      */
     @Override
     public Object instantiate(BeanDefinition beanDefinition) throws BeansException {
-        try {
-            Enhancer enhancer = new Enhancer();
-            enhancer.setSuperclass(beanDefinition.getBeanClass());
-            // 设置拦截器，直接调用父类（原对象）的方法
-            enhancer.setCallback((MethodInterceptor) (obj, method, argsTemp, proxy) -> proxy.invokeSuper(obj, argsTemp));
-            return enhancer.create();
-        } catch (Exception e) {
-            throw new BeansException("Failed to instantiate [" + beanDefinition.getBeanClass().getName() + "] via CGLIB", e);
-        }
+        //TODO 感兴趣的小伙伴可以实现下
+
+        //throw new UnsupportedOperationException("CGLIB instantiation strategy is not supported");
+        //
+        // 1. 创建 CGLIB 核心类
+        Enhancer enhancer = new Enhancer();
+        // 2. 指定要创建谁的子类
+        enhancer.setSuperclass(beanDefinition.getBeanClass());
+        // 3. 设置拦截器（这里直接调用父类方法，即原始类的逻辑）
+        enhancer.setCallback(new MethodInterceptor() {
+            @Override
+            public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+                return proxy.invokeSuper(obj, args);
+            }
+        });
+        // 4. 创建并返回实例
+        return enhancer.create();
     }
 }

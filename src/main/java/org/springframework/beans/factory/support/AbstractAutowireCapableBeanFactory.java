@@ -1,5 +1,8 @@
 package org.springframework.beans.factory.support;
 
+import cn.hutool.core.bean.BeanUtil;
+import org.springframework.beans.PropertyValue;
+import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 
@@ -29,6 +32,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         try {
             // 委派给专门的策略模式方法进行实例化（把造对象的脏活累活包给专业的打工人）
             bean = createBeanInstance(beanDefinition);
+            // 为 bean 填充属性
+            applyPropertyValues(beanName, bean, beanDefinition);
         } catch (Exception e) {
             throw new BeansException("Failed to instantiate [" + beanName + "]", e);
         }
@@ -44,6 +49,44 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     protected Object createBeanInstance(BeanDefinition beanDefinition) throws BeansException {
         // 调用具体的实例化策略（如反射或 CGLIB）
         return this.getInstantiationStrategy().instantiate(beanDefinition);
+    }
+
+    /**
+     * 为bean填充属性
+     *
+     * @param beanName
+     * @param bean
+     * @param beanDefinition
+     */
+    protected void applyPropertyValues(String beanName, Object bean, BeanDefinition beanDefinition) {
+        try {
+            for (PropertyValue propertyValue : beanDefinition.getPropertyValues().getPropertyValues()) {
+                //
+                String name = propertyValue.getName(); // 获得属性名 例如，age
+                Object value = propertyValue.getValue(); // 获得属性值 例如，18
+
+                //通过反射设置属性
+                // 方式一：通过Java反射，getDeclaredField(name)获取bean对象的属性age，然后set(bean, value)将18赋值给age
+                /*// 1. 获取对象的 Class 对象
+                Class<?> clazz = bean.getClass();
+
+                // 2. 尝试从类中找到指定名称的字段 (Field)
+                // getDeclaredField 可以获取私有属性
+                java.lang.reflect.Field field = clazz.getDeclaredField(name);
+
+                // 3. 关键一步：因为属性通常是 private 的，必须设置为可访问
+                field.setAccessible(true);
+
+                // 4. 将值设置到该对象的该字段中
+                field.set(bean, value);*/
+
+                // 方式二 现成的工具类Hutool
+                BeanUtil.setFieldValue(bean, name, value);
+            }
+        } catch (Exception ex) {
+            throw new BeansException("Failed to populate property values for " + beanName, ex);
+        }
+
     }
 
     public InstantiationStrategy getInstantiationStrategy() {

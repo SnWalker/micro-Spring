@@ -5,6 +5,7 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanReference;
 
 /**
  * 具备自动装配能力的抽象工厂。
@@ -59,28 +60,19 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * @param beanDefinition
      */
     protected void applyPropertyValues(String beanName, Object bean, BeanDefinition beanDefinition) {
+        //TODO 暂时不支持解决循环依赖
         try {
             for (PropertyValue propertyValue : beanDefinition.getPropertyValues().getPropertyValues()) {
-                //
+                // 1、获取bean的一条属性信息（包括名称、值）
                 String name = propertyValue.getName(); // 获得属性名 例如，age
                 Object value = propertyValue.getValue(); // 获得属性值 例如，18
-
-                //通过反射设置属性
-                // 方式一：通过Java反射，getDeclaredField(name)获取bean对象的属性age，然后set(bean, value)将18赋值给age
-                /*// 1. 获取对象的 Class 对象
-                Class<?> clazz = bean.getClass();
-
-                // 2. 尝试从类中找到指定名称的字段 (Field)
-                // getDeclaredField 可以获取私有属性
-                java.lang.reflect.Field field = clazz.getDeclaredField(name);
-
-                // 3. 关键一步：因为属性通常是 private 的，必须设置为可访问
-                field.setAccessible(true);
-
-                // 4. 将值设置到该对象的该字段中
-                field.set(bean, value);*/
-
-                // 方式二 现成的工具类Hutool
+                // 2、若不是普通属性，而是bean（当前value并不是beanA依赖的beanB,而是统一封装成的beanReference，其中存储了beanB的信息）
+                if (value instanceof BeanReference) {
+                    // beanA依赖beanB，先实例化beanB
+                    BeanReference beanReference = (BeanReference) value;
+                    value = getBean(beanReference.getBeanName());
+                }
+                // 3、通过反射设置属性
                 BeanUtil.setFieldValue(bean, name, value);
             }
         } catch (Exception ex) {

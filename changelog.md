@@ -111,4 +111,68 @@ public class PopulateBeanWithPropertyValuesTest {
 }
 ```
 
+## 为bean注入bean
+> 代码分支：step-05-populate-bean-with-bean
+
+增加BeanReference类，包装一个bean对另一个bean的引用。实例化beanA后填充属性时，若PropertyValue#value为BeanReference，说明beanA引用beanB，则先去实例化beanB。
+为不增加代码的复杂度提高理解难度，暂时不支持解决循环依赖，后续实现。
+```java
+protected void applyPropertyValues(String beanName, Object bean, BeanDefinition beanDefinition) {
+    //TODO 暂时不支持解决循环依赖
+    try {
+        for (PropertyValue propertyValue : beanDefinition.getPropertyValues().getPropertyValues()) {
+            // 1、获取bean的一条属性信息（包括名称、值）
+            String name = propertyValue.getName(); // 获得属性名 例如，age
+            Object value = propertyValue.getValue(); // 获得属性值 例如，18
+            // 2、若不是普通属性，而是bean（当前value并不是beanA依赖的beanB,而是统一封装成的beanReference，其中存储了beanB的信息）
+            if (value instanceof BeanReference) {
+                // beanA依赖beanB，先实例化beanB
+                BeanReference beanReference = (BeanReference) value;
+                value = getBean(beanReference.getBeanName());
+            }
+            // 3、通过反射设置属性
+            BeanUtil.setFieldValue(bean, name, value);
+        }
+    } catch (Exception ex) {
+        throw new BeansException("Failed to populate property values for " + beanName, ex);
+    }
+}
+```
+
+测试：
+```java
+/**
+ * 为bean注入bean
+ *
+ * @throws Exception
+ */
+@Test
+public void testPopulateBeanWithBean() throws Exception {
+    // 创建容器
+    DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+
+    //注册Car实例
+    PropertyValues propertyValuesForCar = new PropertyValues();
+    propertyValuesForCar.addPropertyValue(new PropertyValue("brand", "BWM"));
+    BeanDefinition carBeanDefinition = new BeanDefinition(Car.class, propertyValuesForCar);
+    beanFactory.registerBeanDefinition("car", carBeanDefinition);
+
+    //注册Person实例
+    PropertyValues propertyValuesForPerson = new PropertyValues();
+    propertyValuesForPerson.addPropertyValue(new PropertyValue("name", "jack"));
+    propertyValuesForPerson.addPropertyValue(new PropertyValue("age", 18));
+    //Person实例依赖Car实例
+    propertyValuesForPerson.addPropertyValue(new PropertyValue("car", new BeanReference("car")));
+    BeanDefinition beanDefinition = new BeanDefinition(Person.class, propertyValuesForPerson);
+    beanFactory.registerBeanDefinition("person", beanDefinition);
+
+    Person person = (Person) beanFactory.getBean("person");
+    System.out.println(person);
+    assertThat(person.getName()).isEqualTo("jack");
+    assertThat(person.getAge()).isEqualTo(18);
+    Car car = person.getCar();
+    assertThat(car).isNotNull();
+    assertThat(car.getBrand()).isEqualTo("BWM");
+}
+```
 

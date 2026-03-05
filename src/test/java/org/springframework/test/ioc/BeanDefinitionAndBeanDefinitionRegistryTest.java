@@ -15,7 +15,8 @@ public class BeanDefinitionAndBeanDefinitionRegistryTest {
 
         HelloService helloService = (HelloService) beanFactory.getBean("helloService");
         helloService.sayHello();
-        // 是否是单例
+
+        // 判断是否是单例
         HelloService helloService1 = (HelloService) beanFactory.getBean("helloService");
         System.out.println(helloService);
         System.out.println(helloService1);

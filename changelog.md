@@ -176,3 +176,53 @@ public void testPopulateBeanWithBean() throws Exception {
 }
 ```
 
+## 资源和资源加载器
+> 代码分支：resource-and-resource-loader
+
+Resource是资源的抽象和访问接口，简单写了三个实现类
+
+![](./assets/resource-and-resource-loader.png)
+
+- FileSystemResource，文件系统资源的实现类
+- ClassPathResource，classpath下资源的实现类
+- UrlResource，对java.net.URL进行资源定位的实现类
+
+ResourceLoader接口则是资源查找定位策略的抽象，DefaultResourceLoader是其默认实现类
+
+测试：
+```java
+public class ResourceAndResourceLoaderTest {
+
+    @Test
+    public void testResourceLoader() throws IOException {
+        // 实例化资源加载器
+        DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
+
+        // 加载classpath下的资源
+        // 1、获取资源
+        Resource resource = resourceLoader.getResource("classpath:hello.txt");
+        // 2、获取资源的输入流
+        InputStream inputStream = resource.getInputStream();
+        // 3、读取资源
+        String content = IoUtil.readUtf8(inputStream);
+        System.out.println(content);
+        assertThat(content).isEqualTo("hello, u look good");
+
+        // 加载文件系统资源
+        resource = resourceLoader.getResource("src/test/resources/hello.txt");
+        assertThat(resource instanceof FileSystemResource).isTrue();
+        inputStream = resource.getInputStream();
+        content = IoUtil.readUtf8(inputStream);
+        System.out.println(content);
+        assertThat(content).isEqualTo("hello, u look good");
+
+        // 加载URL资源
+        resource = resourceLoader.getResource("https://www.jd.com");
+        assertThat(resource instanceof UrlResource).isTrue();
+        inputStream = resource.getInputStream();
+        content = IoUtil.readUtf8(inputStream);
+        System.out.println(content);
+    }
+}
+```
+

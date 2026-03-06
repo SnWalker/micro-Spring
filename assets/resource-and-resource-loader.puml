@@ -1,0 +1,50 @@
+@startuml
+set separator none
+
+package "org.springframework.core.io" {
+
+    interface Resource {
+        +getInputStream(): InputStream
+    }
+
+    interface ResourceLoader {
+        +getResource(location: String): Resource
+    }
+
+    class ClassPathResource {
+        -path: String
+        +ClassPathResource(path: String)
+        +getInputStream(): InputStream
+    }
+
+    class FileSystemResource {
+        -filePath: String
+        +FileSystemResource(filePath: String)
+        +getInputStream(): InputStream
+    }
+
+    class UrlResource {
+        -url: URL
+        +UrlResource(url: URL)
+        +getInputStream(): InputStream
+    }
+
+    class DefaultResourceLoader {
+        {static} +CLASSPATH_URL_PREFIX: String
+        +getResource(location: String): Resource
+    }
+
+}
+
+Resource <|.. ClassPathResource
+Resource <|.. FileSystemResource
+Resource <|.. UrlResource
+
+ResourceLoader <|.. DefaultResourceLoader
+
+DefaultResourceLoader ..> Resource : <<use>>
+DefaultResourceLoader ..> ClassPathResource : <<create>>
+DefaultResourceLoader ..> FileSystemResource : <<create>>
+DefaultResourceLoader ..> UrlResource : <<create>>
+
+@enduml

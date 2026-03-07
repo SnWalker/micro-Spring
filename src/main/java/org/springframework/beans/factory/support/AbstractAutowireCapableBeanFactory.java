@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeansException;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
 
@@ -15,7 +16,7 @@ import org.springframework.beans.factory.config.BeanReference;
  * 而是通过 InstantiationStrategy 接口（搬砖策略）在运行时动态选择最合适的方案。
  * 遵循了<b>单一职责原则 (SRP)</b>：组长负责控制“生产流程”，具体的“搬砖动作”交给策略类。
  */
-public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory {
+public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory {
 
     /** 实例化策略：负责具体的对象创建动作（真正的苦力活在这里） */
     private InstantiationStrategy instantiationStrategy = new SimpleInstantiationStrategy();

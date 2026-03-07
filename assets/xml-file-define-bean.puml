@@ -1,0 +1,111 @@
+@startuml
+set separator none
+
+' 布局优化策略：
+' 1. 强制核心接口支柱横向展开，增加整体宽度。
+' 2. 使用 together 块确保同级组件在同一 rank。
+' 3. 增加隐藏的水平间距以防止过度拥挤。
+
+package "org.springframework.beans" {
+    interface BeanFactory {
+        {method} + getBean(name: String): Object
+        {method} + getBean(name: String, requiredType: Class<T>): T
+    }
+}
+
+package "org.springframework.beans.factory" {
+    interface HierarchicalBeanFactory
+    interface ListableBeanFactory {
+        {method} + getBeansOfType(type: Class<T>): Map<String, T>
+        {method} + getBeanDefinitionNames(): String[]
+    }
+    interface ConfigurableListableBeanFactory {
+        {method} + getBeanDefinition(beanName: String): BeanDefinition
+    }
+}
+
+package "org.springframework.beans.factory.config" {
+    interface SingletonBeanRegistry {
+        {method} + getSingleton(beanName: String): Object
+    }
+    interface AutowireCapableBeanFactory
+    interface ConfigurableBeanFactory
+}
+
+package "org.springframework.beans.factory.support" {
+    interface BeanDefinitionRegistry {
+        {method} + registerBeanDefinition(beanName: String, beanDefinition: BeanDefinition)
+        {method} + getBeanDefinition(beanName: String): BeanDefinition
+        {method} + containsBeanDefinition(beanName: String): boolean
+    }
+    
+    class DefaultSingleBeanRegistry {
+        {field} - singletonObjects: Map<String, Object>
+        {method} + addSingleton(beanName: String, singletonObject: Object)
+    }
+
+    abstract class AbstractBeanFactory {
+        {method} # {abstract} createBean(name: String, beanDefinition: BeanDefinition): Object
+        {method} # {abstract} getBeanDefinition(name: String): BeanDefinition
+    }
+
+    abstract class AbstractAutowireCapableBeanFactory {
+        {field} - instantiationStrategy: InstantiationStrategy
+        {method} # doCreateBean(beanName: String, beanDefinition: BeanDefinition): Object
+        {method} # createBeanInstance(beanDefinition: BeanDefinition): Object
+        {method} # applyPropertyValues(name: String, bean: Object, beanDefinition: BeanDefinition)
+    }
+
+    class DefaultListableBeanFactory {
+        {field} - beanDefinitionMap: Map<String, BeanDefinition>
+    }
+}
+
+' --- 布局控制 (显式拉开宽度) ---
+
+together {
+    interface HierarchicalBeanFactory
+    interface ListableBeanFactory
+    interface AutowireCapableBeanFactory
+}
+
+' 增加隐藏的水平间距
+HierarchicalBeanFactory -[hidden]right- ListableBeanFactory
+ListableBeanFactory -[hidden]right- AutowireCapableBeanFactory
+
+together {
+    interface ConfigurableBeanFactory
+    interface ConfigurableListableBeanFactory
+    interface BeanDefinitionRegistry
+}
+
+ConfigurableBeanFactory -[hidden]right- ConfigurableListableBeanFactory
+ConfigurableListableBeanFactory -[hidden]right- BeanDefinitionRegistry
+
+' --- 关系定义 (自顶向下) ---
+
+' 1. 接口继承关系
+BeanFactory <|-- HierarchicalBeanFactory
+BeanFactory <|-- ListableBeanFactory
+BeanFactory <|-- AutowireCapableBeanFactory
+
+HierarchicalBeanFactory <|-- ConfigurableBeanFactory
+SingletonBeanRegistry <|-- ConfigurableBeanFactory
+
+ListableBeanFactory <|-- ConfigurableListableBeanFactory
+AutowireCapableBeanFactory <|-- ConfigurableListableBeanFactory
+ConfigurableBeanFactory <|-- ConfigurableListableBeanFactory
+
+' 2. 实现类层级与接口实现
+SingletonBeanRegistry <|.. DefaultSingleBeanRegistry
+DefaultSingleBeanRegistry <|-- AbstractBeanFactory
+ConfigurableBeanFactory <|.. AbstractBeanFactory
+
+AbstractBeanFactory <|-- AbstractAutowireCapableBeanFactory
+AutowireCapableBeanFactory <|.. AbstractAutowireCapableBeanFactory
+
+AbstractAutowireCapableBeanFactory <|-- DefaultListableBeanFactory
+ConfigurableListableBeanFactory <|.. DefaultListableBeanFactory
+BeanDefinitionRegistry <|.. DefaultListableBeanFactory
+
+@enduml

@@ -22,4 +22,10 @@ public interface BeanFactory {
      * @throws BeansException 如果获取过程中发生异常（如找不到、实例化失败等）
      */
     Object getBean(String name) throws BeansException;
+
+    /**
+     * 根据名称和类型来查找bean
+     */
+
+    <T> T getBean(String name, Class<T> requiredType) throws BeansException;
 }

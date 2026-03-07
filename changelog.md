@@ -225,4 +225,61 @@ public class ResourceAndResourceLoaderTest {
     }
 }
 ```
+## 在xml文件中定义bean
+> 代码分支：step-07-xml-file-define-bean
 
+有了资源加载器，就可以在xml格式配置文件中声明式地定义bean的信息，资源加载器读取xml文件，解析出bean的信息，然后往容器中注册BeanDefinition。
+
+BeanDefinitionReader是读取bean定义信息的抽象接口，XmlBeanDefinitionReader是从xml文件中读取的实现类。BeanDefinitionReader需要有获取资源的能力，且读取bean定义信息后需要往容器中注册BeanDefinition，因此BeanDefinitionReader的抽象实现类AbstractBeanDefinitionReader拥有ResourceLoader和BeanDefinitionRegistry两个属性。
+
+由于从xml文件中读取的内容是String类型，所以属性仅支持String类型和引用其他Bean。后面会加入类型转换器，实现类型转换。
+
+为了方便功能实现，并且尽量保持和spring中BeanFactory的继承层次一致，对BeanFactory的继承层次稍微做了调整。
+
+![](./assets/xml-file-define-bean.png)
+![](./assets/xml-file-define-bean2.png)
+
+测试：
+bean定义文件spring.xml
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	         http://www.springframework.org/schema/beans/spring-beans.xsd
+		 http://www.springframework.org/schema/context
+		 http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+    <bean id="person" class="org.springframework.test.bean.Person">
+        <property name="name" value="snwalker"/>
+        <property name="car" ref="car"/>
+    </bean>
+
+    <bean id="car" class="org.springframework.test.bean.Car">
+        <property name="brand" value="porsche"/>
+    </bean>
+
+</beans>
+```
+
+```java
+public class XmlFileDefineBeanTest {
+
+	@Test
+	public void testXmlFile() throws Exception {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
+		beanDefinitionReader.loadBeanDefinitions("classpath:spring.xml");
+
+		Person person = (Person) beanFactory.getBean("person");
+		System.out.println(person);
+		assertThat(person.getName()).isEqualTo("snwalker");
+		assertThat(person.getCar().getBrand()).isEqualTo("porsche");
+
+		Car car = (Car) beanFactory.getBean("car");
+		System.out.println(car);
+		assertThat(car.getBrand()).isEqualTo("porsche");
+	}
+}
+```

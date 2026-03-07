@@ -3,6 +3,7 @@ package org.springframework.beans.factory.support;
 import org.springframework.beans.BeanFactory;
 import org.springframework.beans.factory.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
 /**
  * 抽象的 Bean 工厂基类。
@@ -14,7 +15,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
  * 3. 下达指令：开始造这个 Bean (createBean)。
  * 遵循了<b>开闭原则 (OCP)</b>，核心流程不可变，但具体步骤（如何拿图纸、如何造对象）由子类扩展。
  */
-public abstract class AbstractBeanFactory extends DefaultSingleBeanRegistry implements BeanFactory {
+public abstract class AbstractBeanFactory extends DefaultSingleBeanRegistry implements ConfigurableBeanFactory {
 
     @Override
     public Object getBean(String name) {
@@ -36,6 +37,10 @@ public abstract class AbstractBeanFactory extends DefaultSingleBeanRegistry impl
      */
     protected abstract Object createBean(String name, BeanDefinition beanDefinition) throws BeansException;
 
+    @Override
+    public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
+        return ((T) getBean(name));
+    }
     /**
      * 抽象方法：获取 Bean 定义信息。由 DefaultListableBeanFactory 实现。
      */

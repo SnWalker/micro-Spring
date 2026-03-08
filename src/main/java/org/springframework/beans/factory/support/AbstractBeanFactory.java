@@ -3,7 +3,11 @@ package org.springframework.beans.factory.support;
 import org.springframework.beans.BeanFactory;
 import org.springframework.beans.factory.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 抽象的 Bean 工厂基类。
@@ -16,6 +20,8 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * 遵循了<b>开闭原则 (OCP)</b>，核心流程不可变，但具体步骤（如何拿图纸、如何造对象）由子类扩展。
  */
 public abstract class AbstractBeanFactory extends DefaultSingleBeanRegistry implements ConfigurableBeanFactory {
+
+    private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
 
     @Override
     public Object getBean(String name) {
@@ -45,4 +51,15 @@ public abstract class AbstractBeanFactory extends DefaultSingleBeanRegistry impl
      * 抽象方法：获取 Bean 定义信息。由 DefaultListableBeanFactory 实现。
      */
     protected abstract BeanDefinition getBeanDefinition(String name) throws BeansException;
+
+    @Override
+    public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
+        // 有则覆盖
+        this.beanPostProcessors.remove(beanPostProcessor);
+        this.beanPostProcessors.add(beanPostProcessor);
+    }
+
+    public List<BeanPostProcessor> getBeanPostProcessors() {
+        return this.beanPostProcessors;
+    }
 }

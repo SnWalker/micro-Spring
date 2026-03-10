@@ -26,6 +26,6 @@ public interface BeanFactory {
     /**
      * 根据名称和类型来查找bean
      */
-
+    // 重载getBean()，引入泛型，避免手动强制类型转换，编译器自动检查类型转换是否匹配，减少运行时ClassCastException
     <T> T getBean(String name, Class<T> requiredType) throws BeansException;
 }

@@ -1,0 +1,66 @@
+@startuml
+set separator none
+
+package "org.springframework.core.io" {
+    interface ResourceLoader {
+        + getResource(location: String): Resource
+    }
+}
+
+package "org.springframework.beans.factory.config" {
+    interface BeanFactoryPostProcessor {
+        + postProcessBeanFactory(beanFactory: ConfigurableListableBeanFactory): void
+    }
+}
+
+package "org.springframework.context" {
+    interface ApplicationContext {
+    }
+
+    interface ConfigurableApplicationContext {
+        + refresh(): void
+    }
+}
+
+package "org.springframework.context.support" {
+    abstract class AbstractApplicationContext {
+        + refresh(): void
+        # {abstract} refreshBeanFactory(): void
+        # invokeBeanFactoryPostProcessors(beanFactory: ConfigurableListableBeanFactory): void
+        # registerBeanPostProcessors(beanFactory: ConfigurableListableBeanFactory): void
+        + getBean(name: String): Object
+        + getBeanDefinitionNames(): String[]
+        + {abstract} getBeanFactory(): ConfigurableListableBeanFactory
+    }
+
+    abstract class AbstractRefreshableApplicationContext {
+        - beanFactory: DefaultListableBeanFactory
+        # refreshBeanFactory(): void
+        # createBeanFactory(): DefaultListableBeanFactory
+        # {abstract} loadBeanDefinitions(beanFactory: DefaultListableBeanFactory): void
+        + getBeanFactory(): DefaultListableBeanFactory
+    }
+
+    abstract class AbstractXmlApplicationContext {
+        # loadBeanDefinitions(beanFactory: DefaultListableBeanFactory): void
+        # {abstract} getConfigLocations(): String[]
+    }
+
+    class ClassPathXmlApplicationContext {
+        - configLocations: String[]
+        + ClassPathXmlApplicationContext(configLocation: String)
+        + ClassPathXmlApplicationContext(configLocations: String[])
+        # getConfigLocations(): String[]
+    }
+}
+
+ResourceLoader <|-down- ApplicationContext
+ApplicationContext <|-down- ConfigurableApplicationContext
+ConfigurableApplicationContext <|.. AbstractApplicationContext
+AbstractApplicationContext <|-down- AbstractRefreshableApplicationContext
+AbstractRefreshableApplicationContext <|-down- AbstractXmlApplicationContext
+AbstractXmlApplicationContext <|-down- ClassPathXmlApplicationContext
+
+AbstractApplicationContext ..> BeanFactoryPostProcessor : depends on
+
+@enduml

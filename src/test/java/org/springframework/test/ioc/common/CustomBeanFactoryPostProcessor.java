@@ -5,9 +5,9 @@ import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeansException;
 import org.springframework.beans.factory.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanFactoryPostProcesssor;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 
-public class CustomBeanFactoryPostProcessor implements BeanFactoryPostProcesssor {
+public class CustomBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
 
     /**
      * 实现在bean实例化前，修改BeanDefinition

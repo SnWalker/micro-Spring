@@ -1,6 +1,6 @@
 # IOC
 ## [最简单的bean容器](#最简单的bean容器)
-> 分支：simple-bean-container
+> 分支：step-01-simple-bean-container
 
 定义一个简单的bean容器BeanFactory，内部包含一个map用以保存bean，只有注册bean和获取bean两个方法
 ```
@@ -348,3 +348,20 @@ public class BeanFactoryProcessorAndBeanPostProcessorTest {
 	}
 }
 ```
+
+## [应用上下文ApplicationContext](#应用上下文ApplicationContext)
+> 代码分支：step-09-application-context
+
+应用上下文ApplicationContext是spring中较之于BeanFactory更为先进的IOC容器，ApplicationContext除了拥有BeanFactory的所有功能外，还支持特殊类型bean如上一节中的BeanFactoryPostProcessor和BeanPostProcessor的自动识别、资源加载、容器事件和监听器、国际化支持、单例bean自动初始化等。
+
+BeanFactory是spring的基础设施，面向spring本身；而ApplicationContext面向spring的使用者，应用场合使用ApplicationContext。
+
+具体实现查看AbstractApplicationContext#refresh方法即可。注意BeanFactoryPostProcessor和BeanPostProcessor的自动识别，这样就可以在xml文件中配置二者而不需要像上一节一样手动添加到容器中了。
+
+从bean的角度看，目前生命周期如下：
+
+![](./assets/application-context-life-cycle.png)
+
+![](./assets/application-context.png)
+
+测试：见ApplicationContextTest

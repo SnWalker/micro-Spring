@@ -1,6 +1,5 @@
 package org.springframework.beans.factory.support;
 
-import org.springframework.beans.BeanFactory;
 import org.springframework.beans.factory.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -19,7 +18,7 @@ import java.util.List;
  * 3. 下达指令：开始造这个 Bean (createBean)。
  * 遵循了<b>开闭原则 (OCP)</b>，核心流程不可变，但具体步骤（如何拿图纸、如何造对象）由子类扩展。
  */
-public abstract class AbstractBeanFactory extends DefaultSingleBeanRegistry implements ConfigurableBeanFactory {
+public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory {
 
     private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
 

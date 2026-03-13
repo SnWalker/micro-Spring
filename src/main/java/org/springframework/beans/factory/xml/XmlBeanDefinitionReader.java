@@ -26,6 +26,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
     public static final String CLASS_ATTRIBUTE = "class";
     public static final String VALUE_ATTRIBUTE = "value";
     public static final String REF_ATTRIBUTE = "ref";
+    public static final String INIT_METHOD_ATTRIBUTE = "init-method";
+    public static final String DESTROY_METHOD_ATTRIBUTE = "destroy-method";
 
     public XmlBeanDefinitionReader(BeanDefinitionRegistry registry) {
         super(registry);
@@ -84,6 +86,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
                 String id = bean.getAttribute(ID_ATTRIBUTE);
                 String name = bean.getAttribute(NAME_ATTRIBUTE);
                 String className = bean.getAttribute(CLASS_ATTRIBUTE);
+                String initMethodName = bean.getAttribute(INIT_METHOD_ATTRIBUTE);
+                String destroyMethodName = bean.getAttribute(DESTROY_METHOD_ATTRIBUTE);
+
 
                 // 3.2 核心反射：根据全限定类名，将 String 转化为 Java Class 对象
                 Class<?> clazz = null;
@@ -101,6 +106,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
                 // 3.4 实例化 BeanDefinition (注意：这里只是创建了图纸，还没有真正 new 出 Bean 对象)
                 BeanDefinition beanDefinition = new BeanDefinition(clazz);
+                beanDefinition.setInitMethodName(initMethodName);
+                beanDefinition.setDestroyMethodName(destroyMethodName);
 
                 // 4. 遍历当前 <bean> 标签下的子节点，寻找依赖注入的 <property>
                 for (int j = 0; j < bean.getChildNodes().getLength(); j++) {
